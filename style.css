@@ -25,18 +25,22 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    border: 1px solid #ccc; /* Adds a subtle border to each cell */
+    background-size: cover; /* Ensures background images cover the cell */
+    background-position: center; /* Centers background images within the cell */
+    /* z-index: 1; Ensures cells are behind player indicator */
 }
 
 .player {
-    border: 5px solid blue; /* Highlight player's position */
+    border: 8px solid blue; /* Highlight player's position */
+    position: relative; /* Allows player indicator to be positioned relative to the cell */
+    z-index: 2; /* Ensures player indicator is visible above background images */
 }
 
 .oasis {
-    background-image: url('https://i.ibb.co/hL7DxYc/Oasis-marker.png'); /* Replace 'oasis.jpg' with the path to your oasis image */
-    background-size: cover;
+    background-image: url('https://i.ibb.co/hL7DxYc/Oasis-marker.png');
 }
 
 .stargate {
-    background-image: url('https://i.ibb.co/vBsWTg6/Stargate.png'); /* Replace 'stargate.jpg' with the path to your Stargate image */
-    background-size: cover;
+    background-image: url('https://i.ibb.co/vBsWTg6/Stargate.png');
 }
