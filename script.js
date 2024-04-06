@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cells[cellIndex].classList.add('oasis');
             // Use the updated markUsed to specify whether the cell is a mirage or not
             markUsed(pos.x, pos.y, { isOasis: true, isMirage: index === mirageIndex });
+            console.log('Mirage is at:', mirageIndex); // Debugging line
         });
     }
     
