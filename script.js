@@ -38,19 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
         markUsed(playerPosition.x, playerPosition.y);
     }
 
-    function markUsed(x, y) {
-        usedCells.push({ x, y });
-    }
+    function markUsed(x, y, properties = {}) {
+        usedCells.push({ x, y, ...properties });
+    }    
 
     function placeOases() {
         let oasisPositions = generateRandomOasesPositions(4, boardSize);
-        oasisPositions.forEach(pos => {
-            const index = pos.y * boardSize + pos.x;
+        let mirageIndex = Math.floor(Math.random() * oasisPositions.length); // Randomly choose one oasis to be a mirage
+    
+        oasisPositions.forEach((pos, index) => {
             const cells = document.querySelectorAll('#game-board .cell');
-            cells[index].classList.add('oasis');
-            console.log('Applying oasis class to index:', index); // Debugging line
+            const cellIndex = pos.y * boardSize + pos.x;
+            cells[cellIndex].classList.add('oasis');
+            // Use the updated markUsed to specify whether the cell is a mirage or not
+            markUsed(pos.x, pos.y, { isOasis: true, isMirage: index === mirageIndex });
         });
     }
+    
 
     function generateRandomOasesPositions(count, boardSize) {
         let positions = [];
@@ -58,7 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let position = getRandomPosition();
             if (position) { // Ensure position is not null
                 positions.push(position);
-                markUsed(position.x, position.y); // Mark the position as used
+                // Marking an oasis, specifying if it's a mirage
+                //markUsed(pos.x, pos.y, { isOasis: true, isMirage: index === mirageIndex }); // Mark the position as used
                 console.log('Oasis at:', position); // Debugging line
             }
         }
@@ -82,27 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Modify the placeItemAndClues function to mark positions without setting background images
     function placeItemAndClues(itemIndex) {
         let itemPosition = getRandomBlankPosition();
         if (!itemPosition) return; // Exit if no position is available
         items[itemIndex].position = itemPosition;
-        markUsed(itemPosition.x, itemPosition.y);
-    
-        // Set the background image for the item
-        const itemCellIndex = itemPosition.y * boardSize + itemPosition.x;
-        document.querySelectorAll('#game-board .cell')[itemCellIndex].style.backgroundImage = `url(${items[itemIndex].imageUrl})`;
-    
-        // Logic to place clues, ensuring they're placed in the same row and column but not on the item or each other
+        // Marking an item cell
+        markUsed(itemPosition.x, itemPosition.y, { isItem: true, itemId: itemIndex });
+        console.log('Item placed at:', itemPosition); // Debugging line
+
+        // Logic to place clues, now just marking their positions without revealing
         let rowCluePosition = getRandomBlankPositionInRow(itemPosition.y, [itemPosition.x]);
         let colCluePosition = getRandomBlankPositionInCol(itemPosition.x, [itemPosition.y], itemPosition.y);
-    
+
+        console.log('Item Row Clue is placed at:', rowCluePosition); // Debugging line
+        console.log('Item Column Clue is placed at:', colCluePosition); // Debugging line
+
         items[itemIndex].clues = [rowCluePosition, colCluePosition];
-        markUsed(rowCluePosition.x, rowCluePosition.y);
-        markUsed(colCluePosition.x, colCluePosition.y);
-    
-        // Set background images for clues
-        document.querySelectorAll('#game-board .cell')[rowCluePosition.y * boardSize + rowCluePosition.x].style.backgroundImage = `url(${items[itemIndex].clueUrl})`;
-        document.querySelectorAll('#game-board .cell')[colCluePosition.y * boardSize + colCluePosition.x].style.backgroundImage = `url(${items[itemIndex].clueUrl})`;
+
+        // Marking a clue cell
+        markUsed(rowCluePosition.x, rowCluePosition.y, { isClue: true, itemId: itemIndex });
+        markUsed(colCluePosition.x, colCluePosition.y, { isClue: true, itemId: itemIndex });
     }
     
     // Updated to ensure it uses only available positions
@@ -142,6 +147,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Add a function to handle the "Dig" action
+    function digAtSelectedCell() {
+        const selectedCellIndex = playerPosition.y * boardSize + playerPosition.x;
+        const selectedCell = document.querySelectorAll('#game-board .cell')[selectedCellIndex];
+        const cellContent = checkCellContent(playerPosition.x, playerPosition.y);
+
+        switch(cellContent.type) {
+            case 'item':
+                selectedCell.style.backgroundImage = `url(${cellContent.imageUrl})`;
+                break;
+            case 'clue':
+                selectedCell.style.backgroundImage = `url(${cellContent.clueUrl})`;
+                break;
+            case 'oasis':
+                // Change the oasis to a water body or drought based on the logic
+                const imageUrl = cellContent.isMirage ? `url(https://i.ibb.co/CPsjJ7H/Drought.png)` : `url(https://i.ibb.co/7v4CQ6n/Oasis.png)`;
+                selectedCell.style.backgroundImage = `url(${imageUrl})`;
+                break;
+            case 'nothing':
+                selectedCell.style.backgroundImage = `url(https://i.ibb.co/nPdbJJX/Hole.png)`; // Assuming you have a 'holeImageUrl'
+                break;
+        }
+    }
+
+    function checkCellContent(x, y) {
+        const cell = usedCells.find(cell => cell.x === x && cell.y === y);
+        if (!cell) return { type: 'nothing' };
+
+        if (cell.isOasis) {
+            return { type: 'oasis', isMirage: cell.isMirage };
+        }
+        if (cell.isItem) {
+            const item = items[cell.itemId];
+            return { type: 'item', imageUrl: item.imageUrl };
+        }
+        if (cell.isClue) {
+            const item = items[cell.itemId];
+            return { type: 'clue', clueUrl: item.clueUrl };
+        }
+
+        // Default case, might be useful if you have other types of cells
+        return { type: 'unknown' };
+    } 
+    
+
 
 
     function updatePlayerPosition() {
@@ -152,8 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cells[playerCellIndex]) {
             cells[playerCellIndex].classList.add('player');
         }
-    }
-    
+    }    
 
     function movePlayer(direction) {
         switch (direction) {
@@ -179,6 +228,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'ArrowRight') movePlayer('right');
         });
     }
+
+    // Attach event listeners for Enter key and a Dig button to call digAtSelectedCell
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            digAtSelectedCell();
+        }
+    });
+    document.getElementById('dig').addEventListener('click', digAtSelectedCell); // Assuming you have a Dig button with id="dig"
 
     initializeGame();
 });
