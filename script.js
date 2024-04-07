@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionsPerWater = 3;
 
     // Define the initial time in seconds
-    let timeRemaining = 2 * 60;
+    let timeRemaining = 5 * 60;
 
     let items = [
         { name: 'Item 1', position: null, clues: [], imageUrl: 'https://i.ibb.co/FJKxhTN/Item-1.png', clueUrl: 'https://i.ibb.co/N6WH3r3/Item-1-clue.png' },

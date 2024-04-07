@@ -1,0 +1,103 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 60px); /* 5 columns */
+    grid-gap: 5px;
+}
+
+#game-board .cell {
+    width: 60px;
+    height: 60px;
+    background-color: #e4e4e4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-size: cover; /* Ensures background images cover the cell */
+    background-position: center; /* Centers background images within the cell */
+}
+
+.player {
+    border: 5px solid blue; /* Highlight player's position */
+    position: relative; /* Allows player indicator to be positioned relative to the cell */
+    z-index: 2; /* Ensures player indicator is visible above background images */
+    background-image: url('https://i.ibb.co/ZWp6szy/Player.png');
+}
+
+.oasis {
+    background-image: url('https://i.ibb.co/hL7DxYc/Oasis-marker.png');
+}
+
+.stargate {
+    background-image: url('https://i.ibb.co/vBsWTg6/Stargate.png');
+}
+
+#game-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.status-box, .timer-box {
+    background: #FDF0D5; /* Creamy background */
+    border: 1px solid #C49A6C; /* Border color */
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+}
+
+.status-box h3, .timer-box h3 {
+    color: #C49A6C; /* Text color */
+    margin-bottom: 5px;
+}
+
+.status-box img, .timer-box img {
+    height: 30px; /* Adjust size as necessary */
+    margin-right: 5px;
+}
+
+#water-count, #action-count, #game-timer {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+#items-discovered {
+    list-style: none;
+    padding: 0;
+    display: flex; /* Display items in a row */
+    justify-content: center; /* Center items horizontally */
+}
+
+#items-discovered li {
+    width: 50px; /* Adjust based on your icon size */
+    height: 50px; /* Adjust based on your icon size */
+    background-size: cover; /* Cover the area with the image */
+    background-position: center; /* Center the background image */
+    margin: 0 5px; /* Space out the items */
+    opacity: 0.4; /* Set initial opacity to 40% */
+}
+
+#timer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.timer-box {
+    width: 120px; /* Adjust width as necessary */
+    text-align: center;
+}

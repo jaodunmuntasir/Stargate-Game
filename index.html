@@ -6,36 +6,39 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>Stargate Desert Adventure</h1>
     
-    <div id="game-status">
-        <div id="player-status">
-            <div class="status-box">
-                <h3>Player 1</h3>
-                <div class="water-count">
-                    <img src="https://i.ibb.co/r38KYtG/Water.png" alt="Water Count">
-                    <span id="water-count">6</span>
-                </div>
-                <div class="action-count">
-                    <img src="https://i.ibb.co/sbywBmb/Action-Points.png" alt="Action Count">
-                    <span id="action-count">3</span>
-                </div>
+    <div id="player-status">
+        <div class="status-box">
+            <!-- <h3>Player 1</h3> -->
+            <div class="water-count">
+                <img src="https://i.ibb.co/r38KYtG/Water.png" alt="Water Count">
+                <span id="water-count">6</span>
             </div>
-            <div class="status-box">
-                <h3>Items Discovered</h3>
-                <ul id="items-discovered">
-                    <!-- List items will be added here by JavaScript -->
-                </ul>
+            <div class="action-count">
+                <img src="https://i.ibb.co/sbywBmb/Action-Points.png" alt="Action Count">
+                <span id="action-count">3</span>
             </div>
         </div>
+
         <div id="timer">
             <div class="timer-box">
                 <img src="https://cdn-icons-png.flaticon.com/512/109/109613.png" alt="Timer">
                 <span id="game-timer">0:00</span>
             </div>
         </div>
+
+        <div class="status-box">
+            <!-- <h3>Items Discovered</h3> -->
+            <ul id="items-discovered">
+                <!-- List items will be added here by JavaScript -->
+            </ul>
+        </div> 
     </div>
-    
+
+
     <div id="game-container">  
+            
         <div id="game-board"></div>
         <div id="game-controls">
             <button id="move-up">Up</button>

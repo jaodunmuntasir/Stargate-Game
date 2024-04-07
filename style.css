@@ -4,29 +4,81 @@
     box-sizing: border-box;
 }
 
+h1 {
+    font-size: 20px; /* Large size for prominence */
+    color: #4A4A4A; /* Dark gray for strong contrast against most backgrounds */
+    text-align: center; /* Center-align for better presentation */
+    font-weight: 700; /* Bold weight for emphasis */
+    margin-top: 20px; /* Space from the top */
+    margin-bottom: 12px; /* Space before content starts */
+    text-transform: uppercase; /* Uppercase letters for added impact */
+    letter-spacing: 1.5px; /* Spaced out letters for a modern look */
+    font-family: 'Arial', sans-serif; /* Modern, sans-serif font for clean appearance */
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
 #game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
+    /* margin-top: 20px; */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+    color: #333; /* Dark grey color for better readability */
+    background-color: #fdf0d5;
 }
 
 #game-board {
     display: grid;
-    grid-template-columns: repeat(5, 60px); /* 5 columns */
-    grid-gap: 5px;
+    grid-template-columns: repeat(5, 80px); /* Slightly larger cells for a modern look */
+    grid-gap: 10px; /* Increased gap for a cleaner layout */
+    padding: 20px;
+    background:#ffffff; /* Creamy background */;
+    border-radius: 10px; /* Rounded corners for the board */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 #game-board .cell {
     width: 60px;
     height: 60px;
-    background-color: #e4e4e4;
+    background-color: #97ddce;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     background-size: cover; /* Ensures background images cover the cell */
     background-position: center; /* Centers background images within the cell */
+}
+
+#game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+    padding: 20px;
+    flex-wrap: wrap; /* Allow the controls to wrap on smaller screens */
+}
+
+#game-controls button {
+    background-color: #957fe7; /* Warm, inviting button color */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Slightly rounded corners for a modern look */
+    color: #FFFFFF; /* White text for contrast */
+    cursor: pointer; /* Cursor changes to pointer to indicate clickable items */
+    font-size: 16px; /* Slightly larger font for readability */
+    padding: 10px 20px; /* Padding for a larger clickable area */
+    text-transform: uppercase; /* Capitalize button texts for emphasis */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for interactive feedback */
+}
+
+#game-controls button:hover {
+    background-color: #FB8C00; /* Darker shade on hover for interaction feedback */
+    transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+#game-controls button:active {
+    background-color: #EF6C00; /* Even darker shade to simulate a press effect */
+    box-shadow: none; /* Remove shadow to deepen the pressed effect */
+    transform: translateY(1px); /* Push the button down on click */
 }
 
 .player {
@@ -44,33 +96,86 @@
     background-image: url('https://i.ibb.co/vBsWTg6/Stargate.png');
 }
 
-#game-status {
+#player-status {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px; /* Space between status boxes */
+    margin-bottom: 10px; /* Space from the game board */
+    /* padding: 20px; */
+    /* background-color: #fdf0d5; Creamy background */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); Subtle shadow for depth */
+
+}
+
+#player-status .status-box {
+    background: #FAFAFA; /* Lighter background for a modern, clean look */
+    color: #333; /* Dark text for contrast and readability */
+    border: 2px solid #009688; /* Teal border for a pop of color */
+    border-radius: 12px; /* Rounded corners for a softer, modern feel */
+    padding: 5px; /* Ample padding for content breathing space */
+    margin-bottom: 10px; /* Space between status boxes */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    display: flex;
+    align-items: center; /* Align items vertically */
+    gap: 15px; /* Space between icons and text */
+}
+
+#player-status .status-box h3 {
+    margin: 0 0 5px 0; /* Adjust heading margin for tight spacing */
+    font-size: 20px; /* Slightly larger font for headings */
+    color: #00796B; /* Teal color matching the border for consistency */
+    font-weight: 500; /* Medium font weight for a modern look */
+}
+
+#player-status .status-box img {
+    width: 40px; /* Uniform size for icons */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.water-count, .action-count {
+    display: flex;
     align-items: center;
-    padding: 10px;
+    gap: 10px; /* Space between icon and numbers */
 }
 
-.status-box, .timer-box {
-    background: #FDF0D5; /* Creamy background */
-    border: 1px solid #C49A6C; /* Border color */
-    border-radius: 10px;
-    padding: 10px;
-    margin: 5px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+#water-count, #action-count {
+    font-size: 24px; /* Larger font size for key numbers */
+    font-weight: bold; /* Bold for emphasis */
+    color: #005662; /* Dark teal for better readability and visual impact */
 }
 
-.status-box h3, .timer-box h3 {
-    color: #C49A6C; /* Text color */
-    margin-bottom: 5px;
+.timer-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFD700; /* A bright, eye-catching background color */
+    color: #FFFFFF; /* White text for high contrast */
+    font-family: 'Arial', sans-serif;
+    font-size: 1.2em; /* Slightly larger font for easy reading */
+    font-weight: bold;
+    padding: 10px 20px; /* Adequate padding for a spacious look */
+    border-radius: 25px; /* Rounded edges for a soft, modern look */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    border: 2px solid #E5E5E5; /* Light border to define edges against any background */
+    margin: 10px; /* Ensure it doesn't touch other elements */
+    transition: background-color 0.3s ease; /* Smooth transition for interactive effects */
 }
 
-.status-box img, .timer-box img {
-    height: 30px; /* Adjust size as necessary */
-    margin-right: 5px;
+.timer-box img {
+    margin-right: 10px; /* Space between the icon and the text */
+    width: 24px; /* Icon size */
+    height: auto; /* Maintain aspect ratio */
 }
 
-#water-count, #action-count, #game-timer {
+/* Hover effect to indicate interactiveness, even if it's not clickable */
+.timer-box:hover {
+    background-color: #FFC107; /* Slightly darker shade when hovered */
+    cursor: pointer; /* Change cursor to suggest interactiveness */
+}
+
+#game-timer {
     font-weight: bold;
     font-size: 1.5em;
 }
@@ -89,15 +194,4 @@
     background-position: center; /* Center the background image */
     margin: 0 5px; /* Space out the items */
     opacity: 0.4; /* Set initial opacity to 40% */
-}
-
-#timer {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-.timer-box {
-    width: 120px; /* Adjust width as necessary */
-    text-align: center;
 }
