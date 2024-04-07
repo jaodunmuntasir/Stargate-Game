@@ -82,7 +82,6 @@ We recommend the same steps to solve the problem as the lecture.
 - Create the page with static elements (e.g. HTML and CSS). 
 - Pay special attention to the implementation of the square grid! Ensure the elements are square to fit on the page, even on lower-resolution displays. 
 - How do you indicate the field elements? With a background colour or a background image?  
-- You could use the assets in the following package:[ Assets.zip.](https://canvas.elte.hu/courses/43792/files/2808395/download?wrap=1) 
 - Will you have animations? Where, what kind? Get them ready! 
 2. Add behaviour 
 1. The game logic 
