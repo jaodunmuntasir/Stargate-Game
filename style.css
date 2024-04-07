@@ -78,13 +78,17 @@
 #items-discovered {
     list-style: none;
     padding: 0;
+    display: flex; /* Display items in a row */
+    justify-content: center; /* Center items horizontally */
 }
 
 #items-discovered li {
-    /* background: url('item-icon.png') no-repeat left center; Replace with your item icon */
-    padding-left: 40px; /* Adjust based on your icon size */
-    margin-bottom: 5px;
-    background-size: 30px 30px; /* Adjust based on your icon size */
+    width: 50px; /* Adjust based on your icon size */
+    height: 50px; /* Adjust based on your icon size */
+    background-size: cover; /* Cover the area with the image */
+    background-position: center; /* Center the background image */
+    margin: 0 5px; /* Space out the items */
+    opacity: 0.4; /* Set initial opacity to 40% */
 }
 
 #timer {

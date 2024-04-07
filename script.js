@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let gameBoard = document.getElementById('game-board');
 
+    // Initialize a variable for the game timer interval outside of any function to have a global scope.
+    let gameTimerInterval;
+
+    // Define the number of actions allowed per water unit
+    const actionsPerWater = 3;
+
+    // Define the initial time in seconds
+    let timeRemaining = 2 * 60;
+
     let items = [
         { name: 'Item 1', position: null, clues: [], imageUrl: 'https://i.ibb.co/FJKxhTN/Item-1.png', clueUrl: 'https://i.ibb.co/N6WH3r3/Item-1-clue.png' },
         { name: 'Item 2', position: null, clues: [], imageUrl: 'https://i.ibb.co/BZ1sVDB/Item-2.png', clueUrl: 'https://i.ibb.co/8mJ7ysN/Item-2-clue.png' },
@@ -30,8 +39,28 @@ document.addEventListener('DOMContentLoaded', () => {
         attachMovementControls();
 
         // Reset the player's action count to the maximum allowed actions per water unit
-        playerState.actionCount = actionsPerWater;
+        playerState.actionCount = 0;
         updatePlayerStatusUI();
+    }
+
+    // Initialize the game timer
+    function initializeTimer() {
+        const timerElement = document.getElementById('game-timer');
+        const gameTimerInterval = setInterval(() => {
+            // Decrement the time remaining
+            timeRemaining--;
+
+            // Calculate minutes and seconds for display
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // Check if time has run out
+            if (timeRemaining <= 0) {
+                clearInterval(gameTimerInterval);
+                endGame(false); // Time is up, player has lost
+            }
+        }, 1000);
     }
 
     function generateCells() {
@@ -67,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-
     function generateRandomOasesPositions(count, boardSize) {
         let positions = [];
         while (positions.length < count) {
@@ -97,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Modify the placeItemAndClues function to mark positions without setting background images
+    // Function to mark positions without setting background images
     function placeItemAndClues(itemIndex) {
         let itemPosition = getRandomBlankPosition();
         if (!itemPosition) return; // Exit if no position is available
@@ -137,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const randomIndex = Math.floor(Math.random() * potentialPositions.length);
             return potentialPositions[randomIndex];
         } else {
-            return null; // Handle the case where no position is available
+            return null;
         }
     }
     
@@ -153,11 +181,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const randomIndex = Math.floor(Math.random() * potentialPositions.length);
             return potentialPositions[randomIndex];
         } else {
-            return null; // Handle the case where no position is available
+            return null;
         }
     }
 
-    // Add a function to handle the "Dig" action
+    // Function to handle the "Dig" action
     function digAtSelectedCell() {
         const selectedCellIndex = playerPosition.y * boardSize + playerPosition.x;
         const selectedCell = document.querySelectorAll('#game-board .cell')[selectedCellIndex];
@@ -168,6 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
         switch(cellContent.type) {
             case 'item':
                 selectedCell.style.backgroundImage = `url(${cellContent.imageUrl})`;
+                console.log('Item id is ', cellContent.itemId); // Debugging line
+                discoverItem(cellContent.itemId);
                 break;
             case 'clue':
                 selectedCell.style.backgroundImage = `url(${cellContent.clueUrl})`;
@@ -175,11 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'oasis':
                 selectedCell.style.backgroundImage = cellContent.isMirage ? `url(https://i.ibb.co/CPsjJ7H/Drought.png)` : `url(https://i.ibb.co/7v4CQ6n/Oasis.png)`;
                 console.log('Oasis action executed'); // Debugging line
-                digOasis(cellContent.isMirage);
 
                 if (!cellContent.isMirage) {
                     playerState.waterCount = 6; // Replenish water to full
-                    playerState.actionCount = 3; // Reset action count
+                    playerState.actionCount = 0; // Reset action count
                     updatePlayerStatusUI();
                 }
 
@@ -190,10 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         performAction();
+        console.log('Dig action count executed'); // Debugging line
     }
 
     function checkCellContent(x, y) {
         const cell = usedCells.find(cell => cell.x === x && cell.y === y);
+
         if (!cell) return { type: 'nothing' };
 
         if (cell.isOasis) {
@@ -201,19 +232,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (cell.isItem) {
             const item = items[cell.itemId];
-            return { type: 'item', imageUrl: item.imageUrl };
+            return { type: 'item', imageUrl: item.imageUrl, itemId: cell.itemId};
         }
         if (cell.isClue) {
             const item = items[cell.itemId];
             return { type: 'clue', clueUrl: item.clueUrl };
         }
 
-        // Default case, might be useful if you have other types of cells
         return { type: 'unknown' };
-    } 
-    
-
-
+    }
 
     function updatePlayerPosition() {
         const cells = document.querySelectorAll('#game-board .cell');
@@ -233,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'right': if (playerPosition.x < boardSize - 1) playerPosition.x += 1; break;
         }
         updatePlayerPosition();
-        performAction();
     }
 
     function attachMovementControls() {
@@ -241,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('move-down').addEventListener('click', () => {movePlayer('down'); performAction()});
         document.getElementById('move-left').addEventListener('click', () => {movePlayer('left'); performAction()});
         document.getElementById('move-right').addEventListener('click', () => {movePlayer('right'); performAction()});
-        //document.getElementById('dig').addEventListener('click', () => {digAtSelectedCell; performAction()});
         document.getElementById('dig').addEventListener('click', digAtSelectedCell);
 
         // Keyboard controls
@@ -251,19 +276,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'ArrowDown') { movePlayer('down'); validKey = true; }
             if (e.key === 'ArrowLeft') { movePlayer('left'); validKey = true; }
             if (e.key === 'ArrowRight') { movePlayer('right'); validKey = true; }
-            if (e.key === 'Enter') { digAtSelectedCell(); validKey = true; }
+            if (e.key === 'Enter') { digAtSelectedCell(); validKey = false; }
 
             // Call performAction only if a valid key is pressed.
             if (validKey) performAction();
         });
     }
-    
-
-    // Define the total actions allowed per water count
-    const actionsPerWater = 3;
-
-    // Start the game timer
-    let timeRemaining = 4 * 60; // 4 minutes in seconds
 
     // Initialize the discovered items list
     function initializeItemsDiscovered() {
@@ -280,6 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call this function whenever an action is performed
     function performAction() {
         playerState.actionCount++;
+
+        console.log('Action count:', playerState.actionCount); // Debugging line
+
         if (playerState.actionCount >= actionsPerWater) {
             playerState.waterCount--;
             playerState.actionCount = 0; // Reset the action count
@@ -292,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updatePlayerStatusUI();
     }
-    
 
     // Update the UI for player status
     function updatePlayerStatusUI() {
@@ -318,44 +338,17 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(gameTimerInterval);
 
         // Display a message based on the result
-        const message = isVictory ? 'Victory! You have found all items.' : 'Game Over! You have run out of water.';
+        const message = isVictory ? 'Victory! You have found all items.' : 'Game Over! You Loser DumbAss.';
         alert(message);
-        
+
+        // Ask the player if they want to restart the game
+        const restart = confirm("Do you want to play again?");
+        if (restart) {
+            // Refresh the page to start a new game
+            window.location.reload();
+        } else {
         // Disable all controls to prevent further actions
         document.querySelectorAll('button').forEach(button => button.disabled = true);
-        document.removeEventListener('keydown', handleKeyPress);
-    }
-
-    // Initialize a variable for the game timer interval outside of any function to have a global scope.
-    let gameTimerInterval;
-
-    // Initialize the game timer
-    function initializeTimer() {
-        const timerElement = document.getElementById('game-timer');
-        const gameTimerInterval = setInterval(() => {
-            // Decrement the time remaining
-            timeRemaining--;
-
-            // Calculate minutes and seconds for display
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-            // Check if time has run out
-            if (timeRemaining <= 0) {
-                clearInterval(gameTimerInterval);
-                endGame(false); // Time is up, player has lost
-            }
-        }, 1000);
-    }
-
-    // Call this function in digOasis to handle replenishing water and resetting the action count
-    function digOasis(isMirage) {
-        if (!isMirage) {
-            // Replenish water count if the oasis is not a mirage
-            playerState.waterCount = 6;
-            playerState.actionCount = actionsPerWater; // Reset action count to max actions per water
-            updatePlayerStatusUI();
         }
     }
 
