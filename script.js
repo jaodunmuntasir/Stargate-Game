@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Item 3', position: null, clues: [], imageUrl: 'https://i.ibb.co/PZSPtwk/Item-3.png', clueUrl: 'https://i.ibb.co/F3ddfZk/Item-3-clue.png' },
     ];
 
+    // Define initial player state
+    let playerState = {
+        waterCount: 6,
+        actionCount: 0,
+        itemsDiscovered: [false, false, false], // Initially, no items are discovered
+    };
+
     function initializeGame() {
         gameBoard.innerHTML = ''; // Clear previous board
         usedCells = []; // Reset used cells
@@ -21,6 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
         items.forEach((item, index) => { placeItemAndClues(index); });
         updatePlayerPosition();
         attachMovementControls();
+
+        // Reset the player's action count to the maximum allowed actions per water unit
+        playerState.actionCount = actionsPerWater;
+        updatePlayerStatusUI();
     }
 
     function generateCells() {
@@ -63,8 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let position = getRandomPosition();
             if (position) { // Ensure position is not null
                 positions.push(position);
-                // Marking an oasis, specifying if it's a mirage
-                //markUsed(pos.x, pos.y, { isOasis: true, isMirage: index === mirageIndex }); // Mark the position as used
                 console.log('Oasis at:', position); // Debugging line
             }
         }
@@ -154,6 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedCell = document.querySelectorAll('#game-board .cell')[selectedCellIndex];
         const cellContent = checkCellContent(playerPosition.x, playerPosition.y);
 
+        console.log(cellContent); // Debugging line to see what content is found
+
         switch(cellContent.type) {
             case 'item':
                 selectedCell.style.backgroundImage = `url(${cellContent.imageUrl})`;
@@ -162,14 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedCell.style.backgroundImage = `url(${cellContent.clueUrl})`;
                 break;
             case 'oasis':
-                // Change the oasis to a water body or drought based on the logic
-                const imageUrl = cellContent.isMirage ? `url(https://i.ibb.co/CPsjJ7H/Drought.png)` : `url(https://i.ibb.co/7v4CQ6n/Oasis.png)`;
-                selectedCell.style.backgroundImage = `url(${imageUrl})`;
+                selectedCell.style.backgroundImage = cellContent.isMirage ? `url(https://i.ibb.co/CPsjJ7H/Drought.png)` : `url(https://i.ibb.co/7v4CQ6n/Oasis.png)`;
+                console.log('Oasis action executed'); // Debugging line
+                digOasis(cellContent.isMirage);
+
+                if (!cellContent.isMirage) {
+                    playerState.waterCount = 6; // Replenish water to full
+                    playerState.actionCount = 3; // Reset action count
+                    updatePlayerStatusUI();
+                }
+
                 break;
             case 'nothing':
-                selectedCell.style.backgroundImage = `url(https://i.ibb.co/nPdbJJX/Hole.png)`; // Assuming you have a 'holeImageUrl'
+                selectedCell.style.backgroundImage = `url(https://i.ibb.co/nPdbJJX/Hole.png)`;
                 break;
         }
+
+        performAction();
     }
 
     function checkCellContent(x, y) {
@@ -213,30 +233,134 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'right': if (playerPosition.x < boardSize - 1) playerPosition.x += 1; break;
         }
         updatePlayerPosition();
+        performAction();
     }
 
     function attachMovementControls() {
-        document.getElementById('move-up').addEventListener('click', () => movePlayer('up'));
-        document.getElementById('move-down').addEventListener('click', () => movePlayer('down'));
-        document.getElementById('move-left').addEventListener('click', () => movePlayer('left'));
-        document.getElementById('move-right').addEventListener('click', () => movePlayer('right'));
+        document.getElementById('move-up').addEventListener('click', () => {movePlayer('up'); performAction()});
+        document.getElementById('move-down').addEventListener('click', () => {movePlayer('down'); performAction()});
+        document.getElementById('move-left').addEventListener('click', () => {movePlayer('left'); performAction()});
+        document.getElementById('move-right').addEventListener('click', () => {movePlayer('right'); performAction()});
+        //document.getElementById('dig').addEventListener('click', () => {digAtSelectedCell; performAction()});
+        document.getElementById('dig').addEventListener('click', digAtSelectedCell);
 
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp') movePlayer('up');
-            if (e.key === 'ArrowDown') movePlayer('down');
-            if (e.key === 'ArrowLeft') movePlayer('left');
-            if (e.key === 'ArrowRight') movePlayer('right');
+            let validKey = false;
+            if (e.key === 'ArrowUp') { movePlayer('up'); validKey = true; }
+            if (e.key === 'ArrowDown') { movePlayer('down'); validKey = true; }
+            if (e.key === 'ArrowLeft') { movePlayer('left'); validKey = true; }
+            if (e.key === 'ArrowRight') { movePlayer('right'); validKey = true; }
+            if (e.key === 'Enter') { digAtSelectedCell(); validKey = true; }
+
+            // Call performAction only if a valid key is pressed.
+            if (validKey) performAction();
+        });
+    }
+    
+
+    // Define the total actions allowed per water count
+    const actionsPerWater = 3;
+
+    // Start the game timer
+    let timeRemaining = 4 * 60; // 4 minutes in seconds
+
+    // Initialize the discovered items list
+    function initializeItemsDiscovered() {
+        const itemsList = document.getElementById('items-discovered');
+        items.forEach((item, index) => {
+            const listItem = document.createElement('li');
+            listItem.id = `item-${index}`;
+            listItem.style.backgroundImage = `url(${item.imageUrl})`;
+            listItem.style.opacity = 0.4; // Item not discovered, set to 40% opacity
+            itemsList.appendChild(listItem);
         });
     }
 
-    // Attach event listeners for Enter key and a Dig button to call digAtSelectedCell
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            digAtSelectedCell();
+    // Call this function whenever an action is performed
+    function performAction() {
+        playerState.actionCount++;
+        if (playerState.actionCount >= actionsPerWater) {
+            playerState.waterCount--;
+            playerState.actionCount = 0; // Reset the action count
+            updatePlayerStatusUI();
+    
+            // End the game if water count is 0
+            if (playerState.waterCount === 0) {
+                endGame(false); // Player has lost
+            }
         }
-    });
-    document.getElementById('dig').addEventListener('click', digAtSelectedCell); // Assuming you have a Dig button with id="dig"
+        updatePlayerStatusUI();
+    }
+    
 
+    // Update the UI for player status
+    function updatePlayerStatusUI() {
+        document.getElementById('water-count').textContent = playerState.waterCount;
+        document.getElementById('action-count').textContent = playerState.actionCount;
+    }
+
+    // Call this function when an item is discovered
+    function discoverItem(itemIndex) {
+        playerState.itemsDiscovered[itemIndex] = true;
+        const itemElement = document.getElementById(`item-${itemIndex}`);
+        itemElement.style.opacity = 1; // Item discovered, set to 100% opacity
+
+        // Check if all items are discovered for victory
+        if (playerState.itemsDiscovered.every(discovered => discovered)) {
+            endGame(true); // Player has won
+        }
+    }
+
+    // End the game
+    function endGame(isVictory) {
+        // Stop the timer
+        clearInterval(gameTimerInterval);
+
+        // Display a message based on the result
+        const message = isVictory ? 'Victory! You have found all items.' : 'Game Over! You have run out of water.';
+        alert(message);
+        
+        // Disable all controls to prevent further actions
+        document.querySelectorAll('button').forEach(button => button.disabled = true);
+        document.removeEventListener('keydown', handleKeyPress);
+    }
+
+    // Initialize a variable for the game timer interval outside of any function to have a global scope.
+    let gameTimerInterval;
+
+    // Initialize the game timer
+    function initializeTimer() {
+        const timerElement = document.getElementById('game-timer');
+        const gameTimerInterval = setInterval(() => {
+            // Decrement the time remaining
+            timeRemaining--;
+
+            // Calculate minutes and seconds for display
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // Check if time has run out
+            if (timeRemaining <= 0) {
+                clearInterval(gameTimerInterval);
+                endGame(false); // Time is up, player has lost
+            }
+        }, 1000);
+    }
+
+    // Call this function in digOasis to handle replenishing water and resetting the action count
+    function digOasis(isMirage) {
+        if (!isMirage) {
+            // Replenish water count if the oasis is not a mirage
+            playerState.waterCount = 6;
+            playerState.actionCount = actionsPerWater; // Reset action count to max actions per water
+            updatePlayerStatusUI();
+        }
+    }
+
+    // Initialize the game
     initializeGame();
+    initializeItemsDiscovered();
+    initializeTimer();
 });
